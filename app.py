@@ -19,7 +19,7 @@ api = Api(app)
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Astronaut'
+    return 'Hello, World! API on Render now. API build code : BlackHole'
 
 class Home(Resource):
     def get(self):
@@ -39,3 +39,48 @@ class Home(Resource):
             'plugs':plugs
         }
 api.add_resource(Home, "/home")
+
+class DashboardMonth(Resource):
+    def get(self):
+        print("Providing Month Data\n")
+        points = []
+        samples = datetime.now().day        #Samples = day of month
+        for day in range(samples):
+            pwr = random.randint(400,800)
+            points.append(day)
+            points.append(pwr)
+        print(points)
+        return {
+            'points':points
+        }
+api.add_resource(DashboardMonth, "/dashboard/month")
+
+class DashboardDay(Resource):
+    def get(self):
+        print("Providing Day Data\n")
+        points = []
+        samples = datetime.now().hour       #Samples = current hour in 24 hour format (noon = 12, 5 pm = 17)
+        for day in range(samples):
+            pwr = random.randint(0,25)
+            points.append(day)
+            points.append(pwr)
+        print(points)
+        return {
+            'points':points
+        }
+api.add_resource(DashboardDay, "/dashboard/day")
+
+class DashboardPlugs(Resource):
+    def get(self):
+        print("Providing plug data\n")
+        plugCount = 4                           #Hardcoding 4 plugs for testing
+        points = []
+        for plug in range(plugCount):
+            plugPower = random.randint(0,15)        #Each plug = random power from 0 to 15
+            points.append(plug)
+            points.append(plugPower)
+        print(points)
+        return {
+            'points' : points
+        }
+api.add_resource(DashboardPlugs, "/dashboard/plugs")
