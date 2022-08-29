@@ -20,3 +20,22 @@ api = Api(app)
 @app.route('/')
 def hello_world():
     return 'Hello, World! API on Render now. API build code : Astronaut'
+
+class Home(Resource):
+    def get(self):
+        currentMonth = datetime.now().month
+        month = calendar.month_name[currentMonth]
+        summary = "Energy usage looks good"
+        moneysaved = random.randint(-200,200)
+        powersaved = moneysaved * 27
+        savings = "$"+str(moneysaved)+" : "+str(powersaved)+"KWH"
+        delta = random.randint(-15,20)
+        plugs = ["plug1","plug2","plug4"]
+        return {
+            'month':month,
+            'summary':summary,
+            'savings':savings,
+            'delta':delta,
+            'plugs':plugs
+        }
+api.add_resource(Home, "/home")
