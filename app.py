@@ -10,7 +10,7 @@ from pymongo import MongoClient
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
 #Should find a better solution but i got fed up lol
 # import certifi
-import database
+# import database
 
 from flask import Flask, jsonify
 from flask_restful import Api, Resource
