@@ -13,11 +13,8 @@ import certifi
 # import database
 
 CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6op.mongodb.net/SmartPlugDatabase?retryWrites=true&w=majority"
-client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())
 
-db = client.SmartPlugDatabase
-users = db.users
-plugs = db.plugs
+
 
 from flask import Flask, jsonify
 from flask_restful import Api, Resource
@@ -97,6 +94,10 @@ api.add_resource(DashboardPlugs, "/dashboard/plugs")
 class Database(Resource):
     def get(self):
         print("Displaying database information")
+        client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())
+        db = client.SmartPlugDatabase
+        # users = db.users
+        # plugs = db.plugs
         print ("Collections:\n")
         collections = []
         for c in db.list_collection_names():
