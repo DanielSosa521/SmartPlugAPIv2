@@ -9,17 +9,26 @@ from pymongo import MongoClient
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
 #Should find a better solution but i got fed up lol
-# import certifi
+import certifi
 # import database
+
+CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6op.mongodb.net/SmartPlugDatabase?retryWrites=true&w=majority"
+client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())
+
+db = client.SmartPlugDatabase
+users = db.users
+plugs = db.plugs
 
 from flask import Flask, jsonify
 from flask_restful import Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
+buildversion = str(datetime.now().month) + str(datetime.now().day) + str(datetime.now().hour) + str(datetime.now().minute)
+
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : BlackHole'
+    return 'Hello, World! API on Render now. API build code : Comet ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -84,3 +93,17 @@ class DashboardPlugs(Resource):
             'points' : points
         }
 api.add_resource(DashboardPlugs, "/dashboard/plugs")
+
+class Database(Resource):
+    def get(self):
+        print("Displaying database information")
+        print ("Collections:\n")
+        collections = []
+        for c in db.list_collection_names():
+            collections.append(c)                       #Add collection name to list
+            # coll = db[c]      //access that collection
+            
+        return {
+            'collections' : collections
+        }
+api.add_resource(Database, "/database")
