@@ -96,15 +96,24 @@ class Database(Resource):
         print("Displaying database information")
         client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())
         db = client.SmartPlugDatabase
-        # users = db.users
-        # plugs = db.plugs
+        userscollection = db.users
+        plugscollection = db.plugs
         print ("Collections:\n")
         collections = []
         for c in db.list_collection_names():
             collections.append(c)                       #Add collection name to list
             # coll = db[c]      //access that collection
-            
+        users = []
+        cursor = userscollection.find({})
+        for u in cursor:
+            users.append(str(u))
+        plugs = []
+        cursor = plugscollection.find({})
+        for p in cursor:
+            plugs.append(str(p))
         return {
-            'collections' : collections
+            'collections' : collections,
+            'users' : users,
+            'plugs' : plugs
         }
 api.add_resource(Database, "/database")
