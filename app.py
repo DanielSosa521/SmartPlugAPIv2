@@ -117,3 +117,8 @@ class Database(Resource):
             'plugs' : plugs
         }
 api.add_resource(Database, "/database")
+
+class PlugRegistration(Resource):
+    def get(self):
+        print("Registering a plug")
+api.add_resource(PlugRegistration, "/registerplug")
