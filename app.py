@@ -120,5 +120,5 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        return 'Registering a plug. IP :' + request.remote_addr 
+        return 'Registering a plug. IP :' + request.environ['REMOTE_ADDR']
 api.add_resource(PlugRegistration, "/registerplug")
