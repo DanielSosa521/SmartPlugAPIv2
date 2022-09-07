@@ -16,7 +16,7 @@ CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6o
 
 
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 from flask_restful import Api, Resource
 app = Flask(__name__)
 api = Api(app)
@@ -120,5 +120,5 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        return "Registering a plug"
+        return 'Registering a plug. IP :' + request.remote_addr 
 api.add_resource(PlugRegistration, "/registerplug")
