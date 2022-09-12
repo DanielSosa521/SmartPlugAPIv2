@@ -5,6 +5,7 @@ from datetime import datetime
 import calendar
 import random
 from pymongo import MongoClient
+import paho.mqtt.client as mqtt
 
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
@@ -120,5 +121,10 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        return 'Registering a plug. IP :' + request.environ['REMOTE_ADDR']
-api.add_resource(PlugRegistration, "/registerplug")
+        print("Doing mqtt testing")
+        client = mqtt.Client()
+        if (client.connect("broker.hivemq.com", 1883, 30) != 0):
+            return "Could not connect to MQTT server"
+        else:
+            return "MQTT Server connection successful"
+api.add_resource(PlugRegistration, "/test/mqtt")
