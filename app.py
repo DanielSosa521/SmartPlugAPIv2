@@ -127,9 +127,10 @@ class PlugRegistration(Resource):
         if (client.connect(mqtthost, 1883, 30) != 0):
             return "Could not connect to MQTT server"
         else:
-            topic = "sosa/test"
-            print("Publishing test message to MQTT::" + topic)
             status = "MQTT Server connection successful"
-            client.publish(topic, "smartplug mqtt test", 0)
+            mytopic = "sosa/test"
+            mypayload = "sosa api mqtt message"
+            print("Publishing test message to " + mqtthost + "::" + mytopic)
+            client.publish(topic=mytopic, payload=mypayload, qos=2)
             return status
 api.add_resource(PlugRegistration, "/test/mqtt")
