@@ -123,7 +123,7 @@ class PlugRegistration(Resource):
     def get(self):
         print("Doing mqtt testing")
         client = mqtt.Client()
-        mqtthost = "broker.hivemq.com"  
+        mqtthost = "broker.mqttdashboard.com"  
         if (client.connect(mqtthost, 1883, 30) != 0):
             return "Could not connect to MQTT server"
         else:
