@@ -22,11 +22,11 @@ from flask_restful import Api, Resource
 app = Flask(__name__)
 api = Api(app)
 
-buildversion = str(datetime.now().month) + str(datetime.now().day) + str(datetime.now().hour) + str(datetime.now().minute)
+buildversion = str(datetime.now().month) + str(datetime.now().day) 
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Comet ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Dwarf ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -123,8 +123,13 @@ class PlugRegistration(Resource):
     def get(self):
         print("Doing mqtt testing")
         client = mqtt.Client()
-        if (client.connect("broker.hivemq.com", 1883, 30) != 0):
+        mqtthost = "broker.hivemq.com"  
+        if (client.connect(mqtthost, 1883, 30) != 0):
             return "Could not connect to MQTT server"
         else:
-            return "MQTT Server connection successful"
+            topic = "sosa/test/status"
+            print("Publishing test message to MQTT::" + topic)
+            status = "MQTT Server connection successful"
+            client.publish(topic, "smartplug mqtt test", 0)
+            return status
 api.add_resource(PlugRegistration, "/test/mqtt")
