@@ -129,6 +129,7 @@ class PlugRegistration(Resource):
         topic = "sosa/test"
         payload = "One final test " + str(int(random.random()*10000))
         cmdline = script + " " + topic + " \"" + payload + "\""
-        print(subprocess.getoutput(cmdline, shell=True))
+        print("ls : " + subprocess.getoutput("ls"))
+        print(subprocess.getoutput(cmdline))
         return "Called " + script + "... Topic " + topic + " published : " + payload
 api.add_resource(PlugRegistration, "/test/mqtt")
