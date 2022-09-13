@@ -31,6 +31,7 @@ print("Payload = " + mypayload)
 myqos = 1
 print("QOS = " + str(myqos))                     #QOS = at least once ( 1 )
 
-client.publish(mytopic, mypayload, myqos)       #Publish message
+info = client.publish(mytopic, mypayload, myqos)       #Publish message
+print("Published" if info.is_published() else "Not published")
 
 client.disconnect()                         #Disconnect from broker
