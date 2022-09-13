@@ -6,6 +6,7 @@ import calendar
 import random
 from pymongo import MongoClient
 import paho.mqtt.client as mqtt
+import subprocess
 
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
@@ -29,7 +30,7 @@ mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Dwarf ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Eclipse ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -124,17 +125,10 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        mqtthost = "broker.mqttdashboard.com"  
-        print("Doing mqtt testing at " + mqtthost)
-        if (mqttclient.connect(mqtthost, 1883, 30) != 0):
-            return "Could not connect to MQTT server " + mqtthost
-        else:
-            status = "MQTT Server connection successful"
-            mytopic = "sosa/test"
-            mypayload = "sosa api mqtt message"
-            logmsg = "Publishing test message to " + mqtthost + "::" + mytopic
-            print(logmsg)
-            status += logmsg
-            mqttclient.publish(topic=mytopic, payload=mypayload, qos=2)
-            return status
+        script = "pub.py"
+        topic = "sosa/test"
+        payload = "One final test " + str(int(random.random()*10000))
+        cmdline = script + " " + topic + " \"" + payload + "\""
+        subprocess.call(cmdline, shell=True)
+        return "Called " + script + "... Topic " + topic + " published : " + payload
 api.add_resource(PlugRegistration, "/test/mqtt")
