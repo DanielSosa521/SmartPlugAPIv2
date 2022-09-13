@@ -24,6 +24,9 @@ api = Api(app)
 
 buildversion = str(datetime.now().month) + str(datetime.now().day) 
 
+mqttclient = mqtt.Client()
+
+
 @app.route('/')
 def hello_world():
     return 'Hello, World! API on Render now. API build code : Dwarf ' + buildversion
@@ -121,16 +124,17 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        print("Doing mqtt testing")
-        client = mqtt.Client()
         mqtthost = "broker.mqttdashboard.com"  
-        if (client.connect(mqtthost, 1883, 30) != 0):
-            return "Could not connect to MQTT server"
+        print("Doing mqtt testing at " + mqtthost)
+        if (mqttclient.connect(mqtthost, 1883, 30) != 0):
+            return "Could not connect to MQTT server " + mqtthost
         else:
             status = "MQTT Server connection successful"
             mytopic = "sosa/test"
             mypayload = "sosa api mqtt message"
-            print("Publishing test message to " + mqtthost + "::" + mytopic)
-            client.publish(topic=mytopic, payload=mypayload, qos=2)
+            logmsg = "Publishing test message to " + mqtthost + "::" + mytopic
+            print(logmsg)
+            status += logmsg
+            mqttclient.publish(topic=mytopic, payload=mypayload, qos=2)
             return status
 api.add_resource(PlugRegistration, "/test/mqtt")
