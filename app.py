@@ -125,7 +125,7 @@ api.add_resource(Database, "/database")
 
 class PlugRegistration(Resource):
     def get(self):
-        script = "pub.py"
+        script = "python pub.py"
         topic = "sosa/test"
         payload = "One final test " + str(int(random.random()*10000))
         cmdline = script + " " + topic + " \"" + payload + "\""
