@@ -30,7 +30,7 @@ mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Eclipse ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Force ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -127,7 +127,7 @@ class PlugRegistration(Resource):
     def get(self):
         script = "python pub.py"
         topic = "sosa/test"
-        payload = "One final test " + str(int(random.random()*10000))
+        payload = "MQTT worked " + str(int(random.random()*10000))
         cmdline = script + " " + topic + " \"" + payload + "\""
         print("ls : " + subprocess.getoutput("ls"))
         print(subprocess.getoutput(cmdline))

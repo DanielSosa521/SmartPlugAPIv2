@@ -12,7 +12,8 @@ if (len(sys.argv) != 3):
     print("ERROR : Usage : ./pub <topic> <payload>")    ##ensure topic and payload provided
     exit()
 
-mqtthost = "broker.mqttdashboard.com"                   #Broker URL
+# mqtthost = "broker.mqttdashboard.com"                   #Broker URL
+mqtthost = "mqtt.eclipseprojects.io"
 
 if (client.connect(mqtthost, 1883, 30) != 0):
     print("Could not connect to " + mqtthost)       #Setup connection to broker
@@ -32,6 +33,6 @@ myqos = 1
 print("QOS = " + str(myqos))                     #QOS = at least once ( 1 )
 
 info = client.publish(mytopic, mypayload, myqos)       #Publish message
-print("Published" if info.is_published() else "Not published")
+
 
 client.disconnect()                         #Disconnect from broker
