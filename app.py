@@ -19,14 +19,18 @@ CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6o
 
 
 from flask import Flask, jsonify, request
-from flask_restful import Api, Resource
+from flask_restful import Api, Resource, reqparse
 app = Flask(__name__)
 api = Api(app)
 
+# parser = reqparse.RequestParser()
+# parser.add_argument('username', type="str")
+# parser.add_argument('password', type="str")
+
 buildversion = str(datetime.now().month) + str(datetime.now().day) 
 
-mqttclient = mqtt.Client()
 
+mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
@@ -96,6 +100,18 @@ class DashboardPlugs(Resource):
         }
 api.add_resource(DashboardPlugs, "/dashboard/plugs")
 
+class RegisterUser(Resource):
+    def get(self):
+        print("Connection successful")
+        return "Connection successful", 200
+    def post(self):
+        print("Registering a user")
+        jsondata = request.get_json(force=True)
+        username = jsondata['username']
+        password = jsondata['password']
+        return "Register User", 200
+api.add_resource(RegisterUser, "/register")
+
 class Database(Resource):
     def get(self):
         print("Displaying database information")
@@ -133,3 +149,4 @@ class PlugRegistration(Resource):
         print(subprocess.getoutput(cmdline))
         return "Called " + script + "... Topic " + topic + " published : " + payload
 api.add_resource(PlugRegistration, "/test/mqtt")
+
