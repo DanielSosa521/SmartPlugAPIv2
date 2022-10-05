@@ -155,7 +155,7 @@ api.add_resource(PlugRegistration, "/test/mqtt")
 
 
 @app.route('/mqtt/<signal>')
-def get(signal):
+def publishSignal(signal):
     script = "python pub.py"
     topic = "sosa/plug"
     payload = str(signal).upper()
@@ -163,3 +163,7 @@ def get(signal):
     cmdline = script + " " + topic + " \"" + payload + "\""
     print(subprocess.getoutput(cmdline))
     return "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid
+
+@app.route('/upload/<plugid>/<status>/<current>/<energy>')
+def uploadData(plugid, status, current, energy):
+    return "Upload data : plugid=" + plugid + " status=" + status + " current=" + current + " energy=" + energy
