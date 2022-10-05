@@ -3,6 +3,7 @@ __date__ = "April 14, 2022"
 
 from datetime import datetime
 import calendar
+from email import message
 import random
 from pymongo import MongoClient
 import paho.mqtt.client as mqtt
@@ -20,6 +21,9 @@ CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6o
 
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource, reqparse
+from marshmallow import Schema, fields
+
+
 app = Flask(__name__)
 api = Api(app)
 
@@ -34,7 +38,7 @@ mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Force ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Gravity ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -145,8 +149,17 @@ class PlugRegistration(Resource):
         topic = "sosa/test"
         payload = "MQTT worked " + str(int(random.random()*10000))
         cmdline = script + " " + topic + " \"" + payload + "\""
-        print("ls : " + subprocess.getoutput("ls"))
         print(subprocess.getoutput(cmdline))
         return "Called " + script + "... Topic " + topic + " published : " + payload
 api.add_resource(PlugRegistration, "/test/mqtt")
 
+
+@app.route('/mqtt/<signal>')
+def get(signal):
+    script = "python pub.py"
+    topic = "sosa/plug"
+    payload = str(signal).upper()
+    messageid = str(int(random.random()*10000))
+    cmdline = script + " " + topic + " \"" + payload + "\""
+    print(subprocess.getoutput(cmdline))
+    return "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid

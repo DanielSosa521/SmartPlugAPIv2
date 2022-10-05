@@ -13,7 +13,8 @@ if (len(sys.argv) != 3):
     exit()
 
 # mqtthost = "broker.mqttdashboard.com"                   #Broker URL
-mqtthost = "mqtt.eclipseprojects.io"
+# mqtthost = "mqtt.eclipseprojects.io"
+mqtthost = "test.mosquitto.org"
 
 if (client.connect(mqtthost, 1883, 30) != 0):
     print("Could not connect to " + mqtthost)       #Setup connection to broker
