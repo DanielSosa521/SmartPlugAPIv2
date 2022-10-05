@@ -21,7 +21,7 @@ CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6o
 
 from flask import Flask, jsonify, request
 from flask_restful import Api, Resource, reqparse
-from marshmallow import Schema, fields
+# from marshmallow import Schema, fields
 
 
 app = Flask(__name__)
