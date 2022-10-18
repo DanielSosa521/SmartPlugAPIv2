@@ -6,6 +6,7 @@ import calendar
 from email import message
 import random
 from pymongo import MongoClient
+from pprint import pprint
 import paho.mqtt.client as mqtt
 import subprocess
 
@@ -38,7 +39,7 @@ mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Gravity ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Hole ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -166,4 +167,31 @@ def publishSignal(signal):
 
 @app.route('/upload/<plugid>/<status>/<current>/<energy>')
 def uploadData(plugid, status, current, energy):
-    return "Upload data : plugid=" + plugid + " status=" + status + " current=" + current + " energy=" + energy
+        print("Upoading data to database")
+        client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())          #Overhead setup
+        db = client.SmartPlugDatabase
+        plugscollection = db.plugs
+
+        plug = plugscollection.find_one({'plugid' : int(plugid)})               #Get document for plug
+        pprint(plug)
+        if (plug == None):
+            client.close()
+            message = 'Plug with ID' + plugid + ' not found'                    #Abort if plug does not exist
+            print(message)
+            return message
+
+        previousEnergy = plug['energy']
+        newEnergy = previousEnergy + int(energy)                            #Calculate new total energy
+        now = datetime.now().replace(second=0, microsecond=0)               #log current time
+        
+        plugscollection.update_one(
+            {'plugid' : int(plugid) },
+            {'$set' : {
+                'status'        :   status.upper(),                     #Update database document with  new data
+                'current'       :   int(current),
+                'energy'        :   newEnergy,
+                'lastmodified'  :   now
+            }})
+
+        client.close()
+        return "Upload data : plugid=" + plugid + " status=" + status + " current=" + current + " energy=" + energy
