@@ -39,7 +39,7 @@ mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Hole ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Infinity ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -154,6 +154,19 @@ class PlugRegistration(Resource):
         return "Called " + script + "... Topic " + topic + " published : " + payload
 api.add_resource(PlugRegistration, "/test/mqtt")
 
+class Timestamp(Resource):
+    def get(self):
+        now = datetime.now()
+        year = str(now.year)
+        month = str(now.month)
+        day = str(now.day)
+        hour = str(now.hour)
+        minute = str(now.minute)
+        timestamp = year+"_"+month+"_"+day+"_"+hour+minute
+        print("Timestamp : " + timestamp)
+        
+        return timestamp
+api.add_resource(Timestamp, "/timestamp")
 
 @app.route('/mqtt/<signal>')
 def publishSignal(signal):
