@@ -160,10 +160,11 @@ class Timestamp(Resource):
         year = str(now.year)
         month = str(now.month)
         day = str(now.day)
-        hour = str(now.hour)
+        hour = now.hour
         hour = hour - 5
         if (hour < 0):
             hour = hour + 24
+        hour = str(hour)
         minute = str(now.minute)
         timestamp = year+"_"+month+"_"+day+"_"+hour+minute
         print("Timestamp : " + timestamp)
