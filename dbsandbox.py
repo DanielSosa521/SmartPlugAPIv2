@@ -16,35 +16,37 @@ client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())      #overhea
 db = client.SmartPlugDatabase
 userscollection = db.users
 plugscollection = db.plugs
+pricescollection = db.prices
 
 
-user = userscollection.find_one({'username':'danielsosa'})      #find user with username danielsosa
-pprint(user)
+dayNumeric = ( datetime.today().weekday() + 1 ) % 7
+print(dayNumeric)
 
-userplugs = user['plugs']                               #list user's registered plugs
+daypricedata = pricescollection.find_one({
+    'day' : dayNumeric
+})
 
-print("User has plugs " + str(userplugs))
+# pprint(daypricedata)
 
-for p in userplugs:                                             #for each plug
-    print("Searching database for plug " + str(p))
-    plug = plugscollection.find_one({'plugid' : p})                     #find each plugs db document
-    pprint(plug)
-    now = datetime.now().replace(second=0, microsecond=0)               #log current time
-    print(now)
-    plugscollection.update_one(
-        {'plugid' : p},                                                 #update document for plug = plugid
-        {'$set' : {
-            'status'        :   'ON'.upper(),                           #set status
-            'lastmodified'  :   now                                     #set lastmodified info
-         }})    #update database document
+hourlyPrices = daypricedata['priceValues']
 
-# users = []
-# cursor = userscollection.find({})
-# for u in cursor:
-#     users.append(str(u))
-# plugs = []
-# cursor = plugscollection.find({})
-# for p in cursor:
-#     plugs.append(str(p))
-# print(users)
-# print(plugs)
+print(hourlyPrices)
+
+currentHour = datetime.now().hour
+# currentHour = currentHour - 5
+# if (currentHour < 0):
+#     currentHour = currentHour + 24
+print(currentHour)
+
+currentPrice = hourlyPrices[currentHour]
+
+print("Current price : " + str(currentPrice))
+foresightRange = min(currentHour+7, 24)
+cheaperAvailable = False
+
+for i in range (currentHour+1, foresightRange):
+    if (hourlyPrices[i] < (currentPrice * .75)):
+        cheaperAvailable = True
+        print("Power cheaper at " + str(i) + " for cost of " + str(hourlyPrices[i]))
+
+print("Confirm?" if cheaperAvailable else "Pricing OK")

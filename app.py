@@ -34,12 +34,13 @@ api = Api(app)
 
 buildversion = str(datetime.now().month) + str(datetime.now().day) 
 
+costSavingHours = {}
 
 mqttclient = mqtt.Client()
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Infinity ' + buildversion
+    return 'Hello, World! API on Render now. API build code : Jupiter ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -184,10 +185,63 @@ def publishSignal(signal):
     script = "python pub.py"
     topic = "sosa/plug"
     payload = str(signal).upper()
+
+    if (payload == 'ON'):
+        print("TODO : Do price checking")
+        if (powerExpensiveNow()):
+            print("Power cost high")
+            print("Cost Saving Hours - Hour : Price")
+            print(costSavingHours)
+            print("Need confirmation")
+            return "confirm?"
+        else:
+            print("Power cost low, publishing signal")
+    
+    if (payload == 'CONFIRM'):
+        payload = 'ON'
+
     messageid = str(int(random.random()*10000))
     cmdline = script + " " + topic + " \"" + payload + "\""
     print(subprocess.getoutput(cmdline))
     return "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid
+
+
+def powerExpensiveNow():
+    print("Checking if power expensive right now")
+    client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())      #Database overhead
+    db = client.SmartPlugDatabase
+    pricescollection = db.prices
+
+    dayNumeric = ( datetime.today().weekday() + 1 ) % 7
+    print(dayNumeric)
+    daypricedata = pricescollection.find_one({                  #Get todays document
+        'day' : dayNumeric
+    })
+
+
+    hourlyPrices = daypricedata['priceValues']
+    print(hourlyPrices)
+    currentHour = datetime.now().hour
+    currentHour = currentHour - 5
+    if (currentHour < 0):
+        currentHour = currentHour + 24                        #Get price of power at this hour
+    print(currentHour)
+    currentPrice = hourlyPrices[currentHour]
+    print("Current price : " + str(currentPrice))
+
+    findCheaperHours(currentHour, currentPrice, hourlyPrices)       #Find hours when power is cheaper, store in global var
+
+    return currentPrice >= 6
+
+def findCheaperHours(currentHour, currentPrice, hourlyPrices):
+    print("Running price checking algorithms to find better hours")
+    global costSavingHours 
+
+    foresightRange = min(currentHour+7, 24)                                     #Consider next 6 hours limited by midnight
+    for i in range (currentHour+1, foresightRange):
+        if (hourlyPrices[i] < (currentPrice * .75)):
+            print("Power cheaper at " + str(i) + " for cost of " + str(hourlyPrices[i]))    
+            costSavingHours[i] = hourlyPrices[i]                                            #Add hour:cost entry to global dict
 
 @app.route('/upload/<plugid>/<status>/<current>/<energy>')
 def uploadData(plugid, status, current, energy):
