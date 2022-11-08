@@ -10,6 +10,8 @@ from pprint import pprint
 import paho.mqtt.client as mqtt
 import subprocess
 import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
+
 
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
@@ -37,17 +39,20 @@ def getAustinDatetimeNow():
     timeInAustin = datetime.now(austinTimeZone)
     return timeInAustin
     
+buildLabel = 'Kepler'
+buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day)      #Tracker for monitoring build version
 
-buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day) 
+costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
 
-costSavingHours = {}
+sched = BackgroundScheduler(daemon=True)        #Scheduler object
+sched.start()
 
-mqttclient = mqtt.Client()
+mqttclient = mqtt.Client()              #MQTT Broker client
 
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World! API on Render now. API build code : Jupiter ' + buildversion
+    return 'Hello, World! API on Render now. API build code : ' + buildLabel + ' ' + buildversion
 
 class Home(Resource):
     def get(self):
@@ -185,6 +190,30 @@ class Timestamp(Resource):
         
         return timestamp
 api.add_resource(Timestamp, "/timestamp")
+
+def testFunc(x):
+    print("SCHEDULER : Running testFunc with var = " + x)
+
+@app.route('/schedule/<signal>/<hour>/<minute>')
+def scheduleOn(signal, hour, minute):
+    hrInt = int(hour)
+    minInt = int(minute)
+    if (hrInt < 0 or hrInt > 23 or minInt < 0 or minInt > 59):      #Check for valid time
+        return "ERROR : Invalid time input"
+
+    signal = str(signal).upper()
+    if (not (signal == 'ON' or signal == 'OFF')):                       #Check for valid signal type (ON or OFF)
+        return "ERROR : Invalid signal type"
+
+    prompt = "Scheduling auto " + signal + " at " + hour+':'+minute
+    print(prompt)
+    sched.add_job(  testFunc, 
+                    'cron',
+                    args=['TEST X VAR'],        # TODO : Implement actual task schedule instead of dummy task
+                    hour=hrInt, 
+                    minute=minInt)
+
+    return prompt
 
 @app.route('/mqtt/<signal>')
 def publishSignal(signal):
