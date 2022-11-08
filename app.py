@@ -32,18 +32,18 @@ api = Api(app)
 # parser = reqparse.RequestParser()
 # parser.add_argument('username', type="str")
 # parser.add_argument('password', type="str")
-
-buildversion = str(datetime.now().month) + str(datetime.now().day) 
-
-costSavingHours = {}
-
-mqttclient = mqtt.Client()
-
 def getAustinDatetimeNow():
     austinTimeZone = pytz.timezone('America/Chicago')
     timeInAustin = datetime.now(austinTimeZone)
     return timeInAustin
     
+
+buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day) 
+
+costSavingHours = {}
+
+mqttclient = mqtt.Client()
+
 
 @app.route('/')
 def hello_world():
