@@ -1,6 +1,7 @@
 from pprint import pprint
 from pymongo import MongoClient
 from datetime import datetime
+import pytz
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
 #Should find a better solution but i got fed up lol
@@ -11,6 +12,10 @@ CONNECTION_STRING = "mongodb+srv://smartplugadmin:uodqp8ln7wOyKSMV@cluster0.gu6o
 
 
 print("Doing sandbox stuff with database")
+austinTimeZone = pytz.timezone('America/Chicago')
+timeInAustin = datetime.now(austinTimeZone)
+print(timeInAustin.strftime("%H:%M:%S"))
+exit()
 
 client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())      #overhead setup
 db = client.SmartPlugDatabase

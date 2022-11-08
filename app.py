@@ -9,6 +9,7 @@ from pymongo import MongoClient
 from pprint import pprint
 import paho.mqtt.client as mqtt
 import subprocess
+import pytz
 
 #NOTE : Need this package for MongoClient init
 #Without it, SSL CERTIFICATE VERIFY FAILED EXCEPTION
@@ -37,6 +38,12 @@ buildversion = str(datetime.now().month) + str(datetime.now().day)
 costSavingHours = {}
 
 mqttclient = mqtt.Client()
+
+def getAustinDatetimeNow():
+    austinTimeZone = pytz.timezone('America/Chicago')
+    timeInAustin = datetime.now(austinTimeZone)
+    return timeInAustin
+    
 
 @app.route('/')
 def hello_world():
@@ -157,12 +164,11 @@ api.add_resource(PlugRegistration, "/test/mqtt")
 
 class Timestamp(Resource):
     def get(self):
-        now = datetime.now()
+        now = getAustinDatetimeNow()
         year = str(now.year)
         month = str(now.month)
         day = str(now.day)
         hour = now.hour
-        hour = hour - 5
         if (hour < 0):
             hour = hour + 24
         if (hour < 10):
@@ -187,7 +193,6 @@ def publishSignal(signal):
     payload = str(signal).upper()
 
     if (payload == 'ON'):
-        print("TODO : Do price checking")
         if (powerExpensiveNow()):
             print("Power cost high")
             print("Cost Saving Hours - Hour : Price")
@@ -213,7 +218,7 @@ def powerExpensiveNow():
     pricescollection = db.prices
 
     dayNumeric = ( datetime.today().weekday() + 1 ) % 7
-    print(dayNumeric)
+    print("Today numeric : " + str(dayNumeric))
     daypricedata = pricescollection.find_one({                  #Get todays document
         'day' : dayNumeric
     })
@@ -221,11 +226,11 @@ def powerExpensiveNow():
 
     hourlyPrices = daypricedata['priceValues']
     print(hourlyPrices)
-    currentHour = datetime.now().hour
-    currentHour = currentHour - 5
+    currentHour = getAustinDatetimeNow().hour
+    currentHour = currentHour
     if (currentHour < 0):
         currentHour = currentHour + 24                        #Get price of power at this hour
-    print(currentHour)
+    print("Current hour : " + str(currentHour))
     currentPrice = hourlyPrices[currentHour]
     print("Current price : " + str(currentPrice))
 
@@ -260,7 +265,7 @@ def uploadData(plugid, status, current, energy):
 
         previousEnergy = plug['energy']
         newEnergy = previousEnergy + int(energy)                            #Calculate new total energy
-        now = datetime.now().replace(second=0, microsecond=0)               #log current time
+        now = getAustinDatetimeNow().replace(second=0, microsecond=0)               #log current time
         
         plugscollection.update_one(
             {'plugid' : int(plugid) },
