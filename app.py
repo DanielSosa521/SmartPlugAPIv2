@@ -44,7 +44,7 @@ buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().da
 
 costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
 
-sched = BackgroundScheduler(daemon=True)        #Scheduler object
+sched = BackgroundScheduler(timezone='America/Chicago', daemon=True)        #Scheduler object
 sched.start()
 
 mqttclient = mqtt.Client()              #MQTT Broker client
@@ -191,11 +191,21 @@ class Timestamp(Resource):
         return timestamp
 api.add_resource(Timestamp, "/timestamp")
 
-def testFunc(x):
-    print("SCHEDULER : Running testFunc with var = " + x)
+
+# publishDirect
+# Publishes a message without any verification, used for scheduled jobs
+def publishDirect(signal):
+    script = "python pub.py"
+    topic = "sosa/plug"
+    payload = signal
+    messageid = str(int(random.random()*10000))
+    cmdline = script + " " + topic + " \"" + payload + "\""
+    print(subprocess.getoutput(cmdline))
+    print('MessageID : ' + str(messageid))
+
 
 @app.route('/schedule/<signal>/<hour>/<minute>')
-def scheduleOn(signal, hour, minute):
+def scheduleSignal(signal, hour, minute):
     hrInt = int(hour)
     minInt = int(minute)
     if (hrInt < 0 or hrInt > 23 or minInt < 0 or minInt > 59):      #Check for valid time
@@ -207,12 +217,11 @@ def scheduleOn(signal, hour, minute):
 
     prompt = "Scheduling auto " + signal + " at " + hour+':'+minute
     print(prompt)
-    sched.add_job(  testFunc, 
+    sched.add_job(  publishDirect,                      #Add job to scheduler with specified signal, hour, minute
                     'cron',
-                    args=['TEST X VAR'],        # TODO : Implement actual task schedule instead of dummy task
+                    args=[signal],       
                     hour=hrInt, 
                     minute=minInt)
-
     return prompt
 
 @app.route('/mqtt/<signal>')
