@@ -224,6 +224,24 @@ def scheduleSignal(signal, hour, minute):
                     minute=minInt)
     return prompt
 
+@app.route('/schedule/jobs')
+def viewJobs():
+    jobInfo = ''
+    for job in sched.get_jobs():
+        jobInfo = jobInfo+("name: %s, trigger: %s, next run: %s" % (        #Append job data
+            job.name, job.trigger, job.next_run_time))
+        jobInfo = jobInfo+'<br>'
+    print(jobInfo)
+    return jobInfo
+
+@app.route('/schedule/clear')
+def clearJobs():
+    for job in sched.get_jobs():        #For every scheduled job
+        job.remove()                        #Remove it
+    prompt = 'Removed all jobs'
+    print(prompt)
+    return prompt
+
 @app.route('/mqtt/<signal>')
 def publishSignal(signal):
     script = "python pub.py"
