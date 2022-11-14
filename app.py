@@ -264,7 +264,8 @@ def publishSignal(signal):
     messageid = str(int(random.random()*10000))
     cmdline = script + " " + topic + " \"" + payload + "\""
     print(subprocess.getoutput(cmdline))
-    return "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid
+    prompt = "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid
+    return "published"
 
 
 def powerExpensiveNow():
@@ -304,33 +305,31 @@ def findCheaperHours(currentHour, currentPrice, hourlyPrices):
             print("Power cheaper at " + str(i) + " for cost of " + str(hourlyPrices[i]))    
             costSavingHours[i] = hourlyPrices[i]                                            #Add hour:cost entry to global dict
 
-@app.route('/upload/<plugid>/<status>/<current>/<energy>')
-def uploadData(plugid, status, current, energy):
+@app.route('/upload/<plugid>/<status>/<power>/')
+def uploadData(plugid, status, power):
         print("Upoading data to database")
         client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())          #Overhead setup
         db = client.SmartPlugDatabase
         plugscollection = db.plugs
 
         plug = plugscollection.find_one({'plugid' : int(plugid)})               #Get document for plug
-        pprint(plug)
         if (plug == None):
             client.close()
             message = 'Plug with ID' + plugid + ' not found'                    #Abort if plug does not exist
             print(message)
             return message
+        
+        pprint(plug)
 
-        previousEnergy = plug['energy']
-        newEnergy = previousEnergy + int(energy)                            #Calculate new total energy
         now = getAustinDatetimeNow().replace(second=0, microsecond=0)               #log current time
         
         plugscollection.update_one(
             {'plugid' : int(plugid) },
             {'$set' : {
                 'status'        :   status.upper(),                     #Update database document with  new data
-                'current'       :   int(current),
-                'energy'        :   newEnergy,
+                'power'         :   float(power),
                 'lastmodified'  :   now
             }})
 
         client.close()
-        return "Upload data : plugid=" + plugid + " status=" + status + " current=" + current + " energy=" + energy
+        return "Upload success : plugid=" + plugid + " status=" + status + " power " + power
