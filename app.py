@@ -39,7 +39,7 @@ def getAustinDatetimeNow():
     timeInAustin = datetime.now(austinTimeZone)
     return timeInAustin
     
-buildLabel = 'Kepler'
+buildLabel = 'Lunar'
 buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day)      #Tracker for monitoring build version
 
 costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
@@ -195,6 +195,7 @@ api.add_resource(Timestamp, "/timestamp")
 # publishDirect
 # Publishes a message without any verification, used for scheduled jobs
 def publishDirect(signal):
+    print("Doing scheduled publishDirect at " + str(getAustinDatetimeNow()))
     script = "python pub.py"
     topic = "sosa/plug"
     payload = signal
@@ -305,6 +306,8 @@ def findCheaperHours(currentHour, currentPrice, hourlyPrices):
             print("Power cheaper at " + str(i) + " for cost of " + str(hourlyPrices[i]))    
             costSavingHours[i] = hourlyPrices[i]                                            #Add hour:cost entry to global dict
 
+lastUpload = ''
+
 @app.route('/upload/<plugid>/<status>/<power>/')
 def uploadData(plugid, status, power):
         print("Upoading data to database")
@@ -332,4 +335,16 @@ def uploadData(plugid, status, power):
             }})
 
         client.close()
+
+        global lastUpload
+        lastUpload = "Last data upload : <br>Plug : " + plugid + "<br>Status : " + status + "<br>Power = " + power + "<br> at time : " + str(getAustinDatetimeNow().replace(microsecond=0))
+
         return "Upload success : plugid=" + plugid + " status=" + status + " power " + power
+
+@app.route('/check')
+def checkLastUpload():
+    return lastUpload
+
+
+
+
