@@ -227,6 +227,8 @@ def scheduleSignal(signal, hour, minute):
 
 @app.route('/schedule/startscheduler')
 def startScheduler():
+    print("Starting scheduler...")
+    global sched
     sched.start()
     return 'Scheduler started'
 
