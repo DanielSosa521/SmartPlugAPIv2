@@ -45,7 +45,6 @@ buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().da
 costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
 
 sched = BackgroundScheduler(timezone='America/Chicago', daemon=True)        #Scheduler object
-sched.start()
 
 mqttclient = mqtt.Client()              #MQTT Broker client
 
@@ -223,7 +222,13 @@ def scheduleSignal(signal, hour, minute):
                     args=[signal],       
                     hour=hrInt, 
                     minute=minInt)
+    
     return prompt
+
+@app.route('/schedule/startscheduler')
+def startScheduler():
+    sched.start()
+    return 'Scheduler started'
 
 @app.route('/schedule/jobs')
 def viewJobs():
