@@ -39,7 +39,7 @@ def getAustinDatetimeNow():
     timeInAustin = datetime.now(austinTimeZone)
     return timeInAustin
     
-buildLabel = 'Meteor'
+buildLabel = 'Meteorite'
 buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day)      #Tracker for monitoring build version
 
 costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
