@@ -39,7 +39,7 @@ def getAustinDatetimeNow():
     timeInAustin = datetime.now(austinTimeZone)
     return timeInAustin
     
-buildLabel = 'Lunar'
+buildLabel = 'Meteor'
 buildversion = str(getAustinDatetimeNow().month) + str(getAustinDatetimeNow().day)      #Tracker for monitoring build version
 
 costSavingHours = {}            #Global dictionary for alternative cost saving power use hours
@@ -55,19 +55,31 @@ def hello_world():
 
 class Home(Resource):
     def get(self):
-        currentMonth = datetime.now().month
-        month = calendar.month_name[currentMonth]
-        summary = "Energy usage looks good"
+        currentMonth = getAustinDatetimeNow().month
+        month = calendar.month_name[currentMonth] + ' ' + str(getAustinDatetimeNow().day)
+        client = MongoClient(CONNECTION_STRING, tlsCAFile=certifi.where())      #Database overhead
+        db = client.SmartPlugDatabase
+        plugscollection = db.plugs
+
+        summary = ''
         moneysaved = random.randint(-200,200)
         powersaved = moneysaved * 27
         savings = "$"+str(moneysaved)+" : "+str(powersaved)+"KWH"
-        delta = random.randint(-15,20)
-        plugs = ["plug1","plug2","plug4"]
+        
+        plug = plugscollection.find_one({"plugid": 0})                  #shits getting messy sorry lol
+        pprint(plug)
+        power = plug['power']
+        if (plug['status'] == 'ON'):
+            summary = 'Plug is on. Energy usage looks normal'
+        else :
+            summary = 'Plug is off. You\'re saving money!'
+
+        plugs = ["DemoPlug","testplug"]
         return {
             'month':month,
             'summary':summary,
             'savings':savings,
-            'delta':delta,
+            'delta':power,          #instead of delta we just display current power
             'plugs':plugs
         }
 api.add_resource(Home, "/home")
@@ -273,7 +285,11 @@ def publishSignal(signal):
     cmdline = script + " " + topic + " \"" + payload + "\""
     print(subprocess.getoutput(cmdline))
     prompt = "CMDLINE : " + cmdline + "\n Message deployment ID = " + messageid
-    return "published"
+
+    #Update database on MQTT msg deploy
+    uploadData(str(0), payload, str(0))
+
+    return "published and database updated"
 
 
 def powerExpensiveNow():
@@ -313,7 +329,7 @@ def findCheaperHours(currentHour, currentPrice, hourlyPrices):
             print("Power cheaper at " + str(i) + " for cost of " + str(hourlyPrices[i]))    
             costSavingHours[i] = hourlyPrices[i]                                            #Add hour:cost entry to global dict
 
-lastUpload = ''
+lastUpload = 'No upload since last API update. Upload to begin tracking'
 
 @app.route('/upload/<plugid>/<status>/<power>/')
 def uploadData(plugid, status, power):
